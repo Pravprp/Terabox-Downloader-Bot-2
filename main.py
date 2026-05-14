@@ -18,12 +18,10 @@ bot = telebot.TeleBot(BOT_TOKEN)
 # Helper function to scrape the thumbnail from the Terabox link
 def get_thumbnail(url):
     try:
-        # Act like a normal web browser to avoid getting blocked
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
         response = requests.get(url, headers=headers, timeout=5)
         soup = BeautifulSoup(response.content, 'html.parser')
         
-        # Look for the standard 'og:image' meta tag that contains the thumbnail
         meta_og_image = soup.find('meta', property='og:image')
         if meta_og_image and meta_og_image.get('content'):
             return meta_og_image['content']
@@ -56,18 +54,19 @@ def handle_message(message):
         return
 
     for url in terabox_urls:
-        # 1. Safely encode the full URL for Server 1 & 2
+        # 1. Safely encode the full original URL for servers 1 and 2
         safe_url = urllib.parse.quote(url, safe='')
         
-        # 2. Extract just the unique ID for Server 3
-        # This breaks the URL down and grabs the very last part of the path (the ID)
-        parsed_url = urllib.parse.urlparse(url)
-        video_id = parsed_url.path.strip('/').split('/')[-1]
-        
+        # 2. Extract just the ID for server 3
+        # This splits the URL by '/' and grabs the last part (the ID)
+        video_id = url.rstrip('/').split('/')[-1]
+
         # 3. Generate the final URLs
         final_url_1 = "https://www.teraboxdownloader.pro/p/fs.html?q=" + safe_url
         final_url_2 = "https://teradownloader.com/download?l=" + safe_url
-        final_url_3 = f"https://www.teraboxfast.com/p/view.html?url=https%3A%2F%2F1024terabox.com%2Fs%2F{video_id}"
+        
+        # Server 3 ignores the original domain and appends the ID to the 1024terabox format
+        final_url_3 = "https://www.teraboxfast.com/?q=https%3A%2F%2F1024terabox.com%2Fs%2F" + video_id
 
         # 4. Build the buttons
         markup = InlineKeyboardMarkup()
@@ -75,7 +74,6 @@ def handle_message(message):
         button2 = InlineKeyboardButton(text="Watch / Download Server 2", web_app=WebAppInfo(url=final_url_2))
         button3 = InlineKeyboardButton(text="Watch / Download Server 3", web_app=WebAppInfo(url=final_url_3))
         
-        # Add all 3 buttons to the message
         markup.add(button1)
         markup.add(button2)
         markup.add(button3)
@@ -84,7 +82,7 @@ def handle_message(message):
         thumbnail_url = get_thumbnail(url)
         message_text = "✅ **Link Processed!** Choose a server below:"
 
-        # 6. Send the result (With or without photo depending on scraping success)
+        # 6. Send the result
         if thumbnail_url:
             try:
                 bot.send_photo(
@@ -95,7 +93,6 @@ def handle_message(message):
                     parse_mode="Markdown"
                 )
             except Exception:
-                # Fallback just in case Telegram rejects the scraped image URL
                 bot.reply_to(message, message_text, reply_markup=markup, parse_mode="Markdown")
         else:
             bot.reply_to(message, message_text, reply_markup=markup, parse_mode="Markdown")
