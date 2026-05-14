@@ -56,15 +56,20 @@ def handle_message(message):
         return
 
     for url in terabox_urls:
-        # 1. Safely encode the URL
+        # 1. Safely encode the full URL for Server 1 & 2
         safe_url = urllib.parse.quote(url, safe='')
         
-        # Generate the final URLs for all 3 servers
+        # 2. Extract just the unique ID for Server 3
+        # This breaks the URL down and grabs the very last part of the path (the ID)
+        parsed_url = urllib.parse.urlparse(url)
+        video_id = parsed_url.path.strip('/').split('/')[-1]
+        
+        # 3. Generate the final URLs
         final_url_1 = "https://www.teraboxdownloader.pro/p/fs.html?q=" + safe_url
         final_url_2 = "https://teradownloader.com/download?l=" + safe_url
-        final_url_3 = "https://www.teraboxfast.com/p/view.html?url=" + safe_url
+        final_url_3 = f"https://www.teraboxfast.com/p/view.html?url=https%3A%2F%2F1024terabox.com%2Fs%2F{video_id}"
 
-        # 2. Build the buttons
+        # 4. Build the buttons
         markup = InlineKeyboardMarkup()
         button1 = InlineKeyboardButton(text="Watch / Download Server 1", web_app=WebAppInfo(url=final_url_1))
         button2 = InlineKeyboardButton(text="Watch / Download Server 2", web_app=WebAppInfo(url=final_url_2))
@@ -75,11 +80,11 @@ def handle_message(message):
         markup.add(button2)
         markup.add(button3)
 
-        # 3. Try to fetch the thumbnail
+        # 5. Try to fetch the thumbnail
         thumbnail_url = get_thumbnail(url)
         message_text = "✅ **Link Processed!** Choose a server below:"
 
-        # 4. Send the result (With or without photo depending on scraping success)
+        # 6. Send the result (With or without photo depending on scraping success)
         if thumbnail_url:
             try:
                 bot.send_photo(
