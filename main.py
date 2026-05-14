@@ -40,9 +40,8 @@ def handle_message(message):
     terabox_urls = [url for url in urls if 'terabox' in url.lower()]
 
     if not terabox_urls:
-        # Only reply if they actually sent text but it didn't have a valid link
-        # You can comment this out if you want the bot to just silently ignore bad messages
-        bot.reply_to(message, "No valid Terabox links found in that message.")
+        # You can uncomment the line below if you want the bot to reply when a bad link is sent.
+        # bot.reply_to(message, "No valid Terabox links found in that message.")
         return
 
     # 4. Process each valid Terabox link found in the message
@@ -68,10 +67,10 @@ def handle_message(message):
         markup.add(button1)
         markup.add(button2)
 
-        # 5. Send the buttons directly (Animations removed for speed and stability)
+        # 5. Send the buttons directly without showing the raw link
         bot.reply_to(
             message, 
-            f"✅ **Link Processed!** Choose a server below:\n\n`{url}`", 
+            "✅ **Link Processed!** Choose a server below:", 
             reply_markup=markup,
             parse_mode="Markdown"
         )
