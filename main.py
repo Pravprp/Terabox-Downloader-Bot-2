@@ -58,15 +58,22 @@ def handle_message(message):
     for url in terabox_urls:
         # 1. Safely encode the URL
         safe_url = urllib.parse.quote(url, safe='')
+        
+        # Generate the final URLs for all 3 servers
         final_url_1 = "https://www.teraboxdownloader.pro/p/fs.html?q=" + safe_url
         final_url_2 = "https://teradownloader.com/download?l=" + safe_url
+        final_url_3 = "https://www.teraboxfast.com/p/view.html?url=" + safe_url
 
         # 2. Build the buttons
         markup = InlineKeyboardMarkup()
         button1 = InlineKeyboardButton(text="Watch / Download Server 1", web_app=WebAppInfo(url=final_url_1))
         button2 = InlineKeyboardButton(text="Watch / Download Server 2", web_app=WebAppInfo(url=final_url_2))
+        button3 = InlineKeyboardButton(text="Watch / Download Server 3", web_app=WebAppInfo(url=final_url_3))
+        
+        # Add all 3 buttons to the message
         markup.add(button1)
         markup.add(button2)
+        markup.add(button3)
 
         # 3. Try to fetch the thumbnail
         thumbnail_url = get_thumbnail(url)
